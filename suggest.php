@@ -63,7 +63,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
           //ALT BODY FOR PLAIN TEXT IF HTML TRUE
 
           if(!$mail->send()) {
-              echo 'Message could not be sent.';
+              echo 'Message could not be sent. PHPMailer not set for production.';
               echo 'Mailer Error: ' . $mail->ErrorInfo;
               exit;
           }
