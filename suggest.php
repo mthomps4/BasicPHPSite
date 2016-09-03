@@ -10,7 +10,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
         $name = trim(filter_input(INPUT_POST,"name",FILTER_SANITIZE_STRING)); //filter_input allows to filter data and check for errors before POST
         $email = trim(filter_input(INPUT_POST,"email",FILTER_SANITIZE_EMAIL));
-        $details = trim(filter_input(INPUT_POST,"details",FILTER_SANITIZE_SPECIAL_CHARS)); //Allows all forms of text 
+        $details = trim(filter_input(INPUT_POST,"details",FILTER_SANITIZE_SPECIAL_CHARS)); //Allows all forms of text
 
         if($name == "" || $email == "" || $details == ""){
           echo "Please enter in the required fields: Name, Email, and Details";
@@ -18,21 +18,56 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
 
         //if address field was filled out -- Kill the evil spambot
-        if($_Post["address"] != ""){
+        if($_POST["address"] != ""){
           echo "Bad form input";
           exit;
         }
 
+        require("inc/PHPMailer/class.phpmailer.php");
+        $mail = new PHPMailer;
 
-      echo "<pre>";
+        if(!$mail->ValidateAddress($email)){
+          echo "Invalid Email Address";
+          exit;
+        }
+
+
           $emailBody = "";
           $emailBody .= "Name: " . $name . "\n";
           $emailBody .= "Email: " . $email . "\n";
           $emailBody .= "Details: " . $details . "\n";
           echo $emailBody;
-      echo "</pre>";
 
-      //To Do: Send Email
+          //$mail->isSMTP();                                      // Set mailer to use SMTP
+          //$mail->Host = 'smtp1.example.com;smtp2.example.com';  // Specify main and backup SMTP servers
+          //$mail->SMTPAuth = true;                               // Enable SMTP authentication
+          //$mail->Username = 'user@example.com';                 // SMTP username
+          //$mail->Password = 'secret';                           // SMTP password
+          //$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+          //$mail->Port = 587;                                    // TCP port to connect to
+
+          $mail->setFrom($email, $name);
+          $mail->addAddress('matthew.thompson.a@gmail.com', 'Matt T');     // Add a recipient
+          //$mail->addAddress('ellen@example.com');               // Name is optional
+          //$mail->addReplyTo('info@example.com', 'Information');
+          //$mail->addCC('cc@example.com');
+          //$mail->addBCC('bcc@example.com');
+
+          //$mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+          //$mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+          $mail->isHTML(false); //false for plain text           // Set email format to HTML
+
+          $mail->Subject = 'Basic PHP Form Test from ' . $name;
+          $mail->Body    = $emailBody;
+          //$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+          //ALT BODY FOR PLAIN TEXT IF HTML TRUE
+
+          if(!$mail->send()) {
+              echo 'Message could not be sent.';
+              echo 'Mailer Error: ' . $mail->ErrorInfo;
+              exit;
+          }
+
       header("location:suggest.php?status=thanks");
     }
 ?>
